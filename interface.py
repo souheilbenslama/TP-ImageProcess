@@ -1,6 +1,6 @@
 import settings as s
 import filters as f
-import imageIO as io
+import imgIO as io
 import contrast as c
 import stats as st
 import binary as b
