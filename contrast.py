@@ -1,20 +1,24 @@
 import settings as s
 import stats
+import TP1
 from utils import clone
 
 
 def equalization(image):
-    cum_hist = stats.cumulated_histogram(image)
+    cum_hist = TP1.cumulated_histogram(image)
+    cum_prob =cum_hist /stats.nbPixels()
     LUT = [0] * (s.graylevel + 1)
+
+    # n2 = Ent((k-1)*(Pc(n1))
     for g in range(s.graylevel + 1):
-        LUT[g] = int(s.graylevel * cum_hist[g] / stats.nbPixels())
+        LUT[g] = int(s.graylevel * cum_prob)
     new_image = clone(image)
     for h in range(s.height):
         for w in range(s.width):
             new_image[h][w] = LUT[image[h][w]]
     return new_image
 
-
+#?
 def local_equalization(image, size):
     if (size % 2 == 0):
         size += 1
@@ -45,7 +49,6 @@ def linear_transformation(image, points):
             new_image[h][w] = LUT[new_image[h][w]]
     return new_image
 
-
 def dark_dilatation(image):
     points = [
         [0, 0],
@@ -54,14 +57,12 @@ def dark_dilatation(image):
     ]
     return linear_transformation(image, points)
 
-
 def inverse(image):
     points = [
         [0, s.graylevel],
         [s.graylevel, 0]
     ]
     return linear_transformation(image, points)
-
 
 def light_dilatation(image):
     points = [
@@ -70,7 +71,6 @@ def light_dilatation(image):
         [s.graylevel, s.graylevel]
     ]
     return linear_transformation(image, points)
-
 
 def middle_dilatation(image):
     points = [

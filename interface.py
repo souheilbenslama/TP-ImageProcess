@@ -3,6 +3,7 @@ import filters as f
 import imgIO as io
 import contrast as c
 import stats as st
+import TP1 as tp
 import binary as b
 
 import matplotlib
@@ -14,7 +15,7 @@ from tkinter import ttk
 import utils
 
 matplotlib.use('TkAgg')
-__author__ = 'Melek'
+__author__ = 'Souheil'
 
 
 class Interface:
@@ -110,7 +111,6 @@ class Interface:
         self.thresh_slider = tk.Scale(Framethreshold, from_=0, to=0,length=150,tickinterval=0, orient=tk.HORIZONTAL)
         self.thresh_slider.grid(row=0, column=2)
         Framethreshold.pack(anchor=tk.NW)
-
         ttk.Separator(Frametools, orient='horizontal').pack(fill='x', pady=5)
         tk.Label(Frametools, text="Image properties:").pack(anchor=tk.NW)
 
@@ -191,8 +191,8 @@ class Interface:
         self.width_text.config(text=str(s.width))
         self.height_text.config(text=str(s.height))
         self.pixel_text.config(text=str(st.nbPixels()))
-        self.average_text.config(text=str(st.average(self.currentimage)))
-        self.deviation_text.config(text=str(st.deviation(self.currentimage)))
+        self.average_text.config(text=str(tp.avg(self.currentimage)))
+        self.deviation_text.config(text=str(tp.ecartype(self.currentimage)))
         self.entropy_text.config(text=str(st.entropy(self.currentimage)))
         self.SNR_text.config(text=str(st.SNR(self.currentimage)))
         self.displayHistogram()
@@ -205,7 +205,7 @@ class Interface:
 
     def displayHistogram(self):
         self.ax2.clear()
-        self.ax2.plot(st.histogram(self.currentimage))
+        self.ax2.plot(tp.histogram(self.currentimage))
         self.fig2.canvas.draw()
 
     def openButton_callback(self):
@@ -219,6 +219,7 @@ class Interface:
             self.updateStats()
             self.writeConsole("New image opened.\n")
         except Exception:
+            print(Exception.__traceback__)
             self.writeConsole('readError: error with ' + self.entry_text.get() + ': has wrong type or size.\n')
         except FileNotFoundError:
             self.writeConsole("File not found, try again.\n")

@@ -3,8 +3,7 @@ import math
 
 
 def nbPixels():
-    return
-
+    return s.width * s.height
 # average of an image
 def avg(image):
     avg = 0
@@ -22,14 +21,12 @@ def ecartype(image):
             dev += (image[h][w] - averg) ** 2
     return math.sqrt(dev / s.width * s.height)
 
-
 def histogram(image):
     hist = [0] * (s.graylevel + 1)
     for h in range(s.height):
         for w in range(s.width):
             hist[image[h][w]] += 1
     return hist
-
 
 def cumulated_histogram(image):
     hist = histogram(image)
