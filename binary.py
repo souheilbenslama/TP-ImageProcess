@@ -15,7 +15,6 @@ def binarize(image, threshold):
                 new_image[h][w] = 0
     return new_image
 
-
 def thresholding(image):
     hist = histogram(image)
     cum_hist = cumulated_histogram(image)
@@ -44,7 +43,6 @@ def thresholding(image):
             thmin = i
     return binarize(image, thmin),thmin
 
-
 def dilatation(image, size):
     if size % 2 == 0:
         size += 1
@@ -55,10 +53,9 @@ def dilatation(image, size):
             for py in range(max(0, h - size // 2), min(s.height, h + size // 2 + 1)):
                 for px in range(max(0, w - size // 2), min(s.width, w + size // 2 + 1)):
                     mintab.append(image[py][px])
-            jiik
+            mintab.sort()
             new_image[h][w] = mintab[0]
     return new_image
-
 
 def erosion(image, size):
     if size % 2 == 0:
@@ -74,9 +71,9 @@ def erosion(image, size):
             new_image[h][w] = maxtab[len(maxtab) - 1]
     return new_image
 
-
 def closing(image, size):
     return dilatation(erosion(image, size), size)
 
 def opening(image, size):
     return erosion(dilatation(image, size), size)
+

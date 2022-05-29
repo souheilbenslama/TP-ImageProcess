@@ -1,11 +1,10 @@
 import settings as s
-import filters as f
+import TP3 as TP3
 import imgIO as io
-import contrast as c
+import TP2 as c
 import stats as st
 import TP1 as tp
 import binary as b
-
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -21,38 +20,15 @@ __author__ = 'Souheil'
 class Interface:
     def __init__(self, window):
         self.window = window
-        self.window.iconphoto(False, tk.PhotoImage(file='icons/imgicn.png'))
-        self.window.title('Image Processing Tool')
+        self.window.title('TP-ImageProcess')
         self.menu_initialisation()
         self.window.geometry(f'{self.window.winfo_screenwidth() - 100}x{self.window.winfo_screenheight() - 100}+10+10')
+
         self.currentimage = []
         self.previousimage = []
 
     def menu_initialisation(self):
         self.menubar = tk.Menu(self.window)
-
-        menuContrast = tk.Menu(self.menubar, tearoff=0)
-        menuContrast.add_command(label="Equalisation", command=self.equalisation_callback)
-        menuContrast.add_command(label="Local Equalisation", command=self.local_equalisation_callback)
-        menuContrast.add_separator()
-        menuContrast.add_command(label="Dark Dilatation", command=self.darkd_callback)
-        menuContrast.add_command(label="Light Dilatation", command=self.lightd_callback)
-        menuContrast.add_command(label="Middle Dilatation", command=self.middled_callback)
-        menuContrast.add_command(label="Inverse", command=self.inverse_callback)
-        menuContrast.add_separator()
-        menuContrast.add_command(label="Manual Transformation", command=self.manual_transformation_window_callback)
-        self.menubar.add_cascade(label="Contrast", menu=menuContrast)
-
-        menuFilter = tk.Menu(self.menubar, tearoff=0)
-        menuFilter.add_command(label="Median", command=self.median_callback)
-        menuFilter.add_command(label="Average", command=self.average_callback)
-        menuFilter.add_command(label="Gaussian", command=self.gaussian_callback)
-        menuFilter.add_separator()
-        menuFilter.add_command(label="High_boost", command=self.high_boost_callback)
-        menuFilter.add_command(label="Laplace", command=self.laplace_callback)
-        menuFilter.add_separator()
-        menuFilter.add_command(label="Prewitt", command=self.prewitt_callback)
-        self.menubar.add_cascade(label="Filters", menu=menuFilter)
 
         menuBinary = tk.Menu(self.menubar, tearoff=0)
         menuBinary.add_command(label="Manual Thresholding", command=self.manualthresholding_callback)
@@ -73,39 +49,74 @@ class Interface:
 
         self.window.config(menu=self.menubar)
 
-        Frametools = tk.Frame(self.window, width=self.window.winfo_screenwidth() * 0.2)
+        Frametools = tk.Frame(self.window,height=self.window.winfo_screenheight() * 0.3, width=self.window.winfo_screenwidth() * 0.2)
         Frametools.pack_propagate(0)
-        Frametools.pack(anchor=tk.W, side=tk.LEFT, fill=tk.Y, expand=tk.YES)
+        Frametools.pack(anchor=tk.N, side=tk.TOP, fill=tk.X, expand=tk.YES)
 
-        FrameFile = tk.Frame(Frametools, height=100, width=100, pady=5)
+        FrameFile = tk.Frame(Frametools, height=100, width=50, pady=5)
         tk.Label(FrameFile, text="Image Path:").grid(row=0, column=0, padx=2)
         self.entry_text = tk.StringVar()
-        self.entry_text.set("input/melek.pgm")
-        tk.Entry(FrameFile, width=30, textvariable=self.entry_text).grid(row=0, column=1, padx=10)
-        FrameFile.pack(anchor=tk.NW)
+        self.entry_text.set("input/mona.pgm")
+        tk.Entry(FrameFile, width=30, textvariable=self.entry_text).grid(row=1, column=0, padx=10)
+        FrameFile.pack(anchor=tk.NW,side=tk.LEFT)
 
-        Frameopensave = tk.Frame(Frametools, height=100, width=100, pady=5)
-        tk.Button(Frameopensave, text="Open", padx=10, pady=5, command=self.openButton_callback).grid(row=0, column=0,
-                                                                                                      padx=10)
-        tk.Button(Frameopensave, text="Save", padx=10, pady=5, command=self.saveButton_callback).grid(row=0, column=1,
-                                                                                                      padx=10)
-        self.original_button = tk.Button(Frameopensave, text="Original", state=tk.DISABLED, padx=10, pady=5,
-                                         command=self.originalButton_callback)
+        Frameopensave = tk.Frame(FrameFile, height=100, width=100, pady=5)
+        tk.Button(Frameopensave, text="Open", padx=10, pady=5, command=self.openButton_callback).grid(row=0, column=0,padx=10)
+
+        tk.Button(Frameopensave, text="Local", padx=10, pady=5, command=self.local_equalisation_callback).grid(row=0, column=1,padx=10)
+        tk.Button(Frameopensave, text="Save", padx=10, pady=5, command=self.saveButton_callback).grid(row=0, column=2,padx=10)
+        self.original_button = tk.Button(Frameopensave, text="Original", state=tk.DISABLED, padx=10, pady=5, command=self.originalButton_callback)
         self.original_button.grid(row=0, column=2, padx=10)
-        self.undo_button = tk.Button(Frameopensave, text="Undo", state=tk.DISABLED, padx=10, pady=5,
-                                         command=self.undoButton_callback)
+        self.undo_button = tk.Button(Frameopensave, text="Undo", state=tk.DISABLED, padx=10, pady=5, command=self.undoButton_callback)
         self.undo_button.grid(row=0, column=3, padx=10)
-        Frameopensave.pack(anchor=tk.NW)
+        Frameopensave.grid(row =2 , column= 0)
 
-        ttk.Separator(Frametools, orient='horizontal').pack(fill='x', pady=5)
+        #################### here
+        Framecontrast = tk.Frame(Frametools, height=100, width=200, pady=5)
+        ttk.Label(Framecontrast, text="Contrast", background="#fff")
+        tk.Button(Framecontrast, text="Equalisation ", padx=10, pady=5, command=self.equalisation_callback).grid(row=0, column=0,padx=10)
+        tk.Button(Framecontrast, text="Local Equalisation ", padx=10, pady=5, command=self.local_equalisation_callback).grid(row=0,  column=1,padx=10)
+
+        tk.Button(Framecontrast, text="Inverse", padx=10, pady=5, command=self.inverse_callback).grid(row=1, column=1, padx=10)
+        self.original_button = tk.Button(Framecontrast, text="Dark Dilatation", padx=10, pady=5, command=self.darkd_callback)
+        self.original_button.grid(row=1, column=0, padx=10)
+        self.undo_button = tk.Button(Frameopensave, text="Undo", state=tk.DISABLED, padx=10, pady=5, command=self.undoButton_callback)
+        self.undo_button.grid(row=0, column=3, padx=10)
+        Framecontrast.pack(anchor=tk.NW,side=tk.LEFT)
+################### here
+
+
+        Framefilter = tk.Frame(Frametools, height=100, width=100, pady=5)
+        ttk.Label(Framefilter, text="filters", background="#fff")
+        tk.Button(Framefilter, text="Generate noise ", padx=10, pady=5, command=self.noise_callback).grid(row=0, column=0,padx=10)
+        tk.Button(Framefilter, text="Average Filter ", padx=10, pady=5, command=self.average_callback).grid(row=0, column=1, padx=10)
+        self.original_button = tk.Button(Framefilter, text="Mediane Filter", padx=10, pady=5, command=self.median_callback)
+        tk.Button(Framefilter, text="Prewitt", padx=10, pady=5, command=self.prewitt_callback).grid(row=1, column=1, padx=10)
+        self.original_button.grid(row=1, column=0, padx=10)
+        Framefilter.pack(anchor=tk.NW,side=tk.LEFT)
+
+##################
+
+        Framesthresh = tk.Frame(Frametools, height=100, width=100, pady=5)
+        ttk.Label(Framesthresh, text="thresholding", background="#fff").grid(row=0,column=4,padx=10)
+        tk.Button(Framesthresh, text="thresholding", padx=10, pady=5, command=self.noise_callback).grid(row=0,column=0,padx=10)
+        tk.Button(Framesthresh, text="Manual thresholding", padx=10, pady=5, command=self.manualthresholding_callback).grid(row=0, column=1, padx=10)
+        tk.Button(Framesthresh, text="Dilatation", padx=10, pady=5, command=self.average_callback).grid(row=0, column=3, padx=10)
+        tk.Button(Framesthresh, text="Closing", padx=10, pady=5, command=self.prewitt_callback).grid(row=1, column=1, padx=10)
+        tk.Button(Framesthresh, text="Opening", padx=10, pady=5, command=self.prewitt_callback).grid(row=1, column=2, padx=10)
+        self.original_button = tk.Button(Framesthresh, text="Erosion", padx=10, pady=5,command=self.median_callback)
+        self.original_button.grid(row=1, column=0, padx=10)
+        self.undo_button = tk.Button(Frameopensave, text="Undo", state=tk.DISABLED, padx=10, pady=5, command=self.undoButton_callback)
+        self.undo_button.grid(row=0, column=3, padx=10)
+        Framesthresh.pack(anchor=tk.NW,side=tk.LEFT)
+
+##################
 
         Framesize = tk.Frame(Frametools, height=100, width=100, pady=5)
-        tk.Label(Framesize, text="Size of filters,local equalisation and binary operations: ").grid(row=0, column=0,
-                                                                                                   padx=10)
+        tk.Label(Framesize, text="Size of filters,local equalisation and binary operations: ").grid(row=0, column=0,padx=10)
         self.size_num = tk.Spinbox(Framesize, width=3, from_=3, to=29, increment=2)
         self.size_num.grid(row=0, column=2)
         Framesize.pack(anchor=tk.NW)
-
         Framethreshold = tk.Frame(Frametools, height=100, width=100, pady=5)
         tk.Label(Framethreshold, text="Manual threshold value: ").grid(row=0, column=0, padx=10)
         self.thresh_slider = tk.Scale(Framethreshold, from_=0, to=0,length=150,tickinterval=0, orient=tk.HORIZONTAL)
@@ -176,9 +187,9 @@ class Interface:
         self.console.pack()
         FrameConsole.pack(anchor=tk.S, side=tk.BOTTOM)
 
-        self.imageframe = tk.Frame(self.window, width=self.window.winfo_screenwidth() * 0.8)
+        self.imageframe = tk.Frame(self.window, width=self.window.winfo_screenwidth() * 0.3, height=self.window.winfo_screenheight() * 0.7)
         self.imageframe.pack_propagate(0)
-        self.imageframe.pack(side=tk.RIGHT, fill=tk.Y)
+        self.imageframe.pack(side=tk.BOTTOM, fill=tk.X)
 
         self.fig1 = Figure(figsize=(6, 5), dpi=100)
         self.ax1 = self.fig1.add_subplot(111)
@@ -288,39 +299,6 @@ class Interface:
         self.updateStats()
         self.writeConsole("Inversion applied.\n")
 
-    def manual_transformation_window_callback(self):
-        self.points=[]
-        self.manualWindow=tk.Toplevel(self.window)
-        self.manualWindow.title('Manual Contrast Transformation')
-        self.manualWindow.geometry("700x500")
-        Framemain = tk.Frame(self.manualWindow)
-        Framemain.pack_propagate(0)
-        Framemain.pack(anchor=tk.W, side=tk.LEFT, fill=tk.BOTH, expand=tk.YES)
-
-        Framepoint = tk.Frame(Framemain, height=100, width=100, pady=5)
-        tk.Label(Framepoint, text="Old value (X): ").grid(row=0, column=0, padx=2)
-        self.entry_X = tk.IntVar()
-        self.entry_X.set(0)
-        tk.Entry(Framepoint, width=5, textvariable=self.entry_X).grid(row=0, column=1, padx=10)
-        tk.Label(Framepoint, text="New value (Y): ").grid(row=0, column=2, padx=2)
-        self.entry_Y = tk.IntVar()
-        self.entry_Y.set(0)
-        tk.Entry(Framepoint, width=5, textvariable=self.entry_Y).grid(row=0, column=3, padx=10)
-        point_button = tk.Button(Framepoint, text="Add point", padx=10, pady=5,
-                                  command=self.add_point_callback).grid(row=0, column=4, padx=10)
-        Framepoint.pack()
-
-        self.fig3 = Figure(figsize=(6, 5), dpi=100)
-        self.ax3 = self.fig3.add_subplot(111)
-        self.ax3.set_xlim([0, s.graylevel])
-        self.ax3.set_ylim([0, s.graylevel])
-        canvas3 = FigureCanvasTkAgg(self.fig3, Framemain)
-        plot_widget3 = canvas3.get_tk_widget()
-        plot_widget3.config(width=600, height=300)
-        plot_widget3.pack(expand=tk.YES, anchor=tk.CENTER, pady=5, padx=5)
-
-        tk.Button(Framemain, text="Submit", padx=10, pady=5,
-                                         command=self.submit_callback).pack()
 
     def add_point_callback(self):
         x=self.entry_X.get()
@@ -338,63 +316,47 @@ class Interface:
         self.ax3.grid(True)
         self.fig3.canvas.draw()
 
-    def submit_callback(self):
-        if len(self.points)==0:
-            self.points=[[0,0],[255,255]]
-        if (self.points[0][0]!=0):
-            self.points.insert(0,[0,0])
-        if (self.points[-1][0]!=255):
-            self.points.append([255,255])
-        self.manual_transformation()
-        self.manualWindow.destroy()
 
-
-    def manual_transformation(self):
-        self.previousimage = self.currentimage
-        self.undo_button.config(state=tk.NORMAL)
-        self.currentimage = c.linear_transformation(self.currentimage,self.points)
-        self.updateStats()
-        self.writeConsole("Manual_transformation applied.\n")
 
     def median_callback(self):
         self.previousimage = self.currentimage
         self.undo_button.config(state=tk.NORMAL)
-        self.currentimage = f.filter_median(self.currentimage, int(self.size_num.get()))
+        self.currentimage = tp.filter_median(self.currentimage, int(self.size_num.get()))
         self.updateStats()
         self.writeConsole("Median filter applied.\n")
 
     def average_callback(self):
         self.previousimage = self.currentimage
         self.undo_button.config(state=tk.NORMAL)
-        self.currentimage = f.filter_average(self.currentimage, int(self.size_num.get()))
+        self.currentimage = TP3.filter_average(self.currentimage, int(self.size_num.get()))
         self.updateStats()
         self.writeConsole("Average filter applied.\n")
 
     def gaussian_callback(self):
         self.previousimage = self.currentimage
         self.undo_button.config(state=tk.NORMAL)
-        self.currentimage = f.filter_gauss(self.currentimage, int(self.size_num.get()))
+        self.currentimage = TP3.filter_gauss(self.currentimage, int(self.size_num.get()))
         self.updateStats()
         self.writeConsole("Gaussian filter applied.\n")
 
     def high_boost_callback(self):
         self.previousimage = self.currentimage
         self.undo_button.config(state=tk.NORMAL)
-        self.currentimage = f.filter_highboost(self.currentimage, int(self.size_num.get()))
+        self.currentimage = TP3.filter_highboost(self.currentimage, int(self.size_num.get()))
         self.updateStats()
         self.writeConsole("High boost filter applied.\n")
 
     def laplace_callback(self):
         self.previousimage = self.currentimage
         self.undo_button.config(state=tk.NORMAL)
-        self.currentimage = f.filter_laplace(self.currentimage)
+        self.currentimage = TP3.filter_laplace(self.currentimage)
         self.updateStats()
         self.writeConsole("Laplace filter applied.\n")
 
     def prewitt_callback(self):
         self.previousimage = self.currentimage
         self.undo_button.config(state=tk.NORMAL)
-        self.currentimage = f.filter_prewitt(self.currentimage, int(self.size_num.get()))
+        self.currentimage = TP3.filter_prewitt(self.currentimage, int(self.size_num.get()))
         self.updateStats()
         self.writeConsole("Prewitt filter applied.\n")
 
@@ -444,7 +406,7 @@ class Interface:
     def noise_callback(self):
         self.previousimage = self.currentimage
         self.undo_button.config(state=tk.NORMAL)
-        self.currentimage = utils.noise(self.currentimage, s.width, s.height, s.graylevel)
+        self.currentimage = TP3.noise(self.currentimage, s.width, s.height, s.graylevel)
         self.updateStats()
         self.writeConsole("Noise applied.\n")
 

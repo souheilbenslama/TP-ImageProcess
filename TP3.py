@@ -1,6 +1,19 @@
+import random
+
 import settings as s
 from utils import clone
 
+
+def noise(Matrix, width, height, val):
+    new_Matrix = clone(Matrix)
+    for h in range(height):
+        for w in range(width):
+            x = random.randint(0, 20)
+            if (x == 0):
+                new_Matrix[h][w] = 0
+            if (x == 20):
+                new_Matrix[h][w] = val
+    return new_Matrix
 
 def filter_median(image, size):
     if (size % 2 == 0):

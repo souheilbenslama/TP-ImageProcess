@@ -14,7 +14,6 @@ def entropy(image):
             ent += p * math.log2(1 / p)
     return ent
 
-
 def dynamic(image):
     hist = TP1.histogram(image)
     dmin, dmax = 0, s.graylevel
@@ -42,5 +41,9 @@ def SNR(image):
             S += (s.image_orig[h][w] - avg) ** 2
             B += (image[h][w] - s.image_orig[h][w]) ** 2
     if (B == 0):
+        return 0.0
+    if(S<0) :
+        return 0.0
+    if(B<0):
         return 0.0
     return math.sqrt(S / B)
