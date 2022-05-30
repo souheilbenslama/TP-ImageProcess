@@ -72,8 +72,10 @@ def erosion(image, size):
     return new_image
 
 def closing(image, size):
-    return dilatation(erosion(image, size), size)
+    return erosion(dilatation(image, size), size)
+
 
 def opening(image, size):
-    return erosion(dilatation(image, size), size)
+    return dilatation(erosion(image, size), size)
+
 
